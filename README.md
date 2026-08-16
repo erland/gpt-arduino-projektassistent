@@ -281,3 +281,29 @@ knowledge/14-circuit-yaml-svg-generator.md
 ```
 
 Knowledge-paketet innehåller nu 15 filer och ligger fortfarande under gränsen 20 filer.
+---
+
+## Distributioner och GitHub Releases
+
+Repositoryt kan nu bygga två distributioner från samma källor:
+
+- `arduino-projektassistent-custom-gpt-vX.Y.Z.zip` – installationspaket för Custom GPT. `instructions.txt` genereras exakt från textblocket **Färdig huvudinstruktion för GPT Builder** i `gpt-instructions/12-gpt-huvudinstruktion.md`, och samtliga 15 Knowledge-filer kopieras byte-identiskt från `knowledge/`.
+- `arduino-projektassistent-chat-vX.Y.Z.zip` – portabel variant för en vanlig ChatGPT-konversation med `START-HERE.md`, samma GPT Builder-instruktion och samma Knowledge.
+
+### Bygg lokalt
+
+```bash
+python3 scripts/build_distributions.py
+python3 scripts/validate_distributions.py
+```
+
+Vanliga byggen använder versionsnumret i `VERSION`.
+
+### GitHub Release
+
+När en GitHub Release publiceras med en SemVer-tagg, exempelvis `v1.0.0` eller `v1.1.0`, använder workflowen taggen som versionskälla. Den versionen används i ZIP-filnamnen, `VERSION` inne i båda paketen samt portable-paketets `MANIFEST.json`. ZIP-filerna bifogas automatiskt som release assets.
+
+### Viktig bakåtkompatibilitet
+
+Build- och portable-funktionaliteten ändrar inte den befintliga GPT Builder-källan eller Knowledge-filerna. `gpt-instructions/12-gpt-huvudinstruktion.md` och alla 15 filer i `knowledge/` är fortsatt kanoniska källor för den nuvarande GPT-konfigurationen.
+
