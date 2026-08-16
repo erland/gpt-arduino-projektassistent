@@ -30,26 +30,26 @@ knowledge/13-knowledge-filstruktur.md
 knowledge/14-circuit-yaml-svg-generator.md
 ```
 
-## Filer som inte ska laddas upp som Knowledge i MVP
+## Filer som inte ska laddas upp som Knowledge
 
-Ladda inte upp:
+Ladda inte upp repositoryts installations- och byggstöd som Knowledge:
 
 ```text
 gpt-instructions/
-notes/
-testfall/
 gpt-builder/
+portable/
+scripts/
+.github/
 README.md
-project-status.md
+VERSION
 ```
 
 Skäl:
 
-- `gpt-instructions/` är arbetsunderlag och versionerade instruktioner.
-- `notes/` är designbeslut, inte styrande kunskap.
-- `testfall/` är verifieringsmaterial, inte kunskap som GPT:n behöver använda i vanliga svar.
-- `gpt-builder/` är installationsstöd för människan som bygger GPT:n.
-- `README.md` och `project-status.md` är projektadministration.
+- `gpt-instructions/12-gpt-huvudinstruktion.md` är källan till den instruktion som klistras in i GPT Builder, inte en extra Knowledge-fil.
+- `gpt-builder/` är installationsstöd för den som konfigurerar GPT:n.
+- `portable/`, `scripts/` och `.github/` hör till distribution och release.
+- `README.md` och `VERSION` är repositorymetadata.
 
 ## Prioritet vid konflikt
 
