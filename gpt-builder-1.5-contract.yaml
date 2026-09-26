@@ -1,0 +1,114 @@
+schema_version: 1
+builder:
+  target_version: 1.5.0
+  strategy: normalize_existing_canonical_contract
+  behavior_preserving: true
+
+canonical:
+  project_contract: gpt-project.yaml
+  instruction: assistant/instructions.md
+  legacy_instruction_source: gpt-instructions/12-gpt-huvudinstruktion.md
+  version_file: VERSION
+  knowledge_root: knowledge
+
+contracts:
+  capabilities:
+    critical:
+      - safe_low_voltage_electronics_guidance
+      - consistent_wiring_code_component_reasoning
+    required:
+      - level_adaptation
+      - bounded_questioning
+      - component_selection
+      - complete_arduino_code
+      - wiring_table
+      - troubleshooting
+      - documentation
+      - circuit_yaml_generation
+    optional:
+      - web_research
+      - file_analysis
+
+  artifacts:
+    required:
+      buildable_project:
+        sections:
+          - project_overview
+          - target_group_and_difficulty
+          - learning_goals
+          - recommended_microcontroller
+          - component_list
+          - component_rationale
+          - wiring_table
+          - power_and_electrical_rules
+          - complete_code
+          - code_explanation
+          - test_steps
+          - troubleshooting
+          - safety_notes
+          - simplifications_or_extensions
+      circuit_yaml:
+        specification: Circuit SVG Generator v1.1
+        conditional: true
+      documentation:
+        distinguish_confirmed_assumed_missing_and_recommended: true
+
+  state:
+    authority:
+      current_request: current_user_requirements
+      technical_rules: canonical_instruction_plus_knowledge
+      safety_rules: knowledge/07-kopplingsregler-och-sakerhet.md
+    preserve_user_level: true
+    preserve_budget_and_available_parts: true
+    assumptions_must_be_explicit: true
+
+  tools:
+    conditional:
+      - id: web
+        purpose:
+          - current_prices
+          - current_product_variants
+          - exact_module_pinout_or_specification
+      - id: file-analysis
+        purpose:
+          - inspect_uploaded_code
+          - inspect_component_lists
+          - inspect_existing_project_material
+
+behavior:
+  safety_priority_first: true
+  low_voltage_default: true
+  mains_230v_hobby_builds_allowed: false
+  gpio_direct_external_load_drive_allowed: false
+  voltage_current_logic_level_and_gnd_checks_required: true
+  wiring_table_before_or_with_code: true
+  code_pin_and_wiring_consistency_required: true
+  safe_load_start_state_required: true
+  max_normal_followup_questions: 3
+  level_model:
+    min: 0
+    max: 4
+  circuit_yaml_specification: Circuit SVG Generator v1.1
+  unverified_prices_must_be_marked_estimate: true
+  incomplete_existing_project_must_distinguish_assumptions: true
+
+knowledge:
+  expected_files: 15
+
+release_policy:
+  current_version: 1.0.0
+  preserve_version_during_migration: true
+
+runtime_policy:
+  active:
+    chat:
+      compatibility: equivalent_runtime_dependent
+    custom-gpt:
+      compatibility: equivalent_with_platform_constraints
+  assessment_pending:
+    claude:
+      compatibility: assessment_pending
+    opencode:
+      compatibility: assessment_pending
+    openai_plugin:
+      compatibility: assessment_pending
