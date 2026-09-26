@@ -13,15 +13,33 @@ def main():
         if not p.is_file(): raise SystemExit(f'Saknad distribution: {p}')
         with zipfile.ZipFile(p) as z: bad=z.testzip();
         if bad: raise SystemExit(f'Korrupt ZIP {p}: {bad}')
-    instr=extract_instruction().encode('utf-8')
+    instr=(ROOT/'assistant/instructions.md').read_bytes()
     with zipfile.ZipFile(paths[0]) as z:
         if z.read('VERSION').decode().strip()!=version: raise SystemExit('Fel VERSION i Custom GPT')
-        if z.read('gpt-configuration/instructions.txt')!=instr: raise SystemExit('Custom GPT instruction avviker från Builder-instruktionen')
+        if z.read('gpt-configuration/instructions.txt')!=instr: raise SystemExit('Custom GPT instruction avviker från canonical instruktion')
+        custom_instr=z.read('gpt-configuration/instructions.txt').decode('utf-8')
+        for marker in [
+            'Skapa alltid kopplingstabell innan eller tillsammans med kod.',
+            'Koppla inte 5 V-signaler direkt till 3,3 V-ingångar om det inte är verifierat säkert.',
+            'Rekommendera aldrig att motorer, reläer, elektromagneter, solenoider, högtalare eller andra externa laster drivs direkt från en GPIO-pin.',
+            'Hjälp inte användaren att bygga projekt med nätspänning/230 V som vanlig hobbykoppling.',
+            'skapa `circuit.yaml` enligt Circuit SVG Generator v1.1',
+        ]:
+            if marker not in custom_instr: raise SystemExit('Custom GPT saknar kritisk beteendemarkör: '+marker)
         for f in KNOWLEDGE:
             if z.read('knowledge-upload/'+f)!=(ROOT/'knowledge'/f).read_bytes(): raise SystemExit(f'Custom Knowledge avviker: {f}')
     with zipfile.ZipFile(paths[1]) as z:
         if z.read('VERSION').decode().strip()!=version: raise SystemExit('Fel VERSION i Chat')
-        if z.read('assistant/instructions.txt')!=instr: raise SystemExit('Portable instruction avviker från Builder-instruktionen')
+        if z.read('assistant/instructions.txt')!=instr: raise SystemExit('Portable instruction avviker från canonical instruktion')
+        chat_instr=z.read('assistant/instructions.txt').decode('utf-8')
+        for marker in [
+            'Skapa alltid kopplingstabell innan eller tillsammans med kod.',
+            'Koppla inte 5 V-signaler direkt till 3,3 V-ingångar om det inte är verifierat säkert.',
+            'Rekommendera aldrig att motorer, reläer, elektromagneter, solenoider, högtalare eller andra externa laster drivs direkt från en GPIO-pin.',
+            'Hjälp inte användaren att bygga projekt med nätspänning/230 V som vanlig hobbykoppling.',
+            'skapa `circuit.yaml` enligt Circuit SVG Generator v1.1',
+        ]:
+            if marker not in chat_instr: raise SystemExit('Chat saknar kritisk beteendemarkör: '+marker)
         for f in KNOWLEDGE:
             if z.read('knowledge/'+f)!=(ROOT/'knowledge'/f).read_bytes(): raise SystemExit(f'Portable Knowledge avviker: {f}')
         manifest=json.loads(z.read('MANIFEST.json'))
