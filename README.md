@@ -69,3 +69,21 @@ VERSION                  fallback-version för icke-releasebyggen
 ```
 
 Historiska utvecklingssteg, designanteckningar och stegvisa testartefakter ligger inte längre kvar i arbetskopian; de bevaras av Git-historiken.
+
+## GPT Byggaren 1.5.0
+
+Migreringen är **7/7 komplett**. Canonical runtime-instruktion finns i `assistant/instructions.md`; legacy-källan i `gpt-instructions/12-gpt-huvudinstruktion.md` bevaras. Build, validering och aktivt distributionsset härleds från `runtime-distribution-registry.yaml`.
+
+Bevarat genom migreringen:
+- version `1.0.0`
+- 15/15 Knowledge-filer
+- säker lågspänningsinriktning
+- inget vanligt hobbybygge med nätspänning/230 V
+- inga externa laster direkt från GPIO
+- kontroll av spänning, ström, logiknivå och gemensam GND
+- kopplingstabell före eller tillsammans med kod
+- konsistens mellan pinout, koppling och kod
+- högst tre kompletterande frågor normalt
+- `circuit.yaml` enligt Circuit SVG Generator v1.1
+
+Aktiva runtimes är Chat och Custom GPT. Claude Projects, OpenCode och OpenAI Plugin är compatibility-bedömda kandidater men inte aktiva distributionsmål.
