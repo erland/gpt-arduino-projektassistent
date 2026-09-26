@@ -1,0 +1,56 @@
+schema_version: 1
+project:
+  id: arduino-projektassistent
+  name: Arduino-projektassistenten
+  profile: technical_project_assistant
+
+instructions:
+  canonical: assistant/instructions.md
+  legacy_source: gpt-instructions/12-gpt-huvudinstruktion.md
+  legacy_extraction:
+    marker: "## Färdig huvudinstruktion för GPT Builder"
+    fenced_block_language: text
+  preserve_legacy_source: true
+
+knowledge_architecture:
+  canonical_root: knowledge
+  upload_manifest: gpt-builder/02-uppladdningslista-knowledge.md
+  expected_files: 15
+
+runtime:
+  chat_zip:
+    enabled: true
+  custom_gpt:
+    enabled: true
+    instruction:
+      source: assistant/instructions.md
+      packaging_path: gpt-configuration/instructions.txt
+      max_characters: 8000
+    knowledge:
+      strategy: upload_manifest
+      expected_files: 15
+  claude:
+    enabled: false
+    compatibility: assessment_pending
+  opencode:
+    enabled: false
+    compatibility: assessment_pending
+  openai_plugin:
+    enabled: false
+    compatibility: assessment_pending
+
+capabilities:
+  critical:
+    - safe_low_voltage_electronics_guidance
+    - consistent_wiring_code_component_reasoning
+  important:
+    - circuit_yaml_generation
+    - code_generation
+    - troubleshooting
+    - documentation
+    - optional_web_research
+
+release:
+  version_file: VERSION
+  preserve_current_version: true
+  current_version: 1.0.0
