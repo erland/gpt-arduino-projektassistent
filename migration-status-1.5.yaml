@@ -1,0 +1,46 @@
+schema_version: 1
+project:
+  id: arduino-projektassistent
+  name: Arduino-projektassistenten
+  version: 1.0.0
+
+migration:
+  target_builder_version: 1.5.0
+  strategy: behavior_preserving
+  plan: docs/gpt-builder-1.5-runtime-migration.md
+  total_steps: 7
+
+progress:
+  current_step: 2
+  last_completed_step: 1
+  completed_steps:
+    - 1
+  skipped_steps: []
+
+preservation:
+  canonical_instruction: assistant/instructions.md
+  legacy_instruction_source: gpt-instructions/12-gpt-huvudinstruktion.md
+  canonical_matches_legacy_extracted_runtime_instruction: true
+  preserve_version_1_0_0: true
+  preserve_knowledge_15_of_15: true
+  preserve_low_voltage_safety_rules: true
+  preserve_gpio_load_protection_rules: true
+  preserve_wiring_code_consistency: true
+  preserve_level_adaptation: true
+  preserve_circuit_yaml_v1_1: true
+
+runtime_baseline:
+  active:
+    - chat
+    - custom-gpt
+  assessment_pending:
+    - claude
+    - opencode
+    - openai_plugin
+
+next_step:
+  recommended: 2
+  title: Normalisera GPT Byggaren 1.5-kontrakten
+  reason: "Canonical runtime-instruktion och preserve-first baseline är etablerade."
+
+human_readable_status: "Steg 1 av 7 i GPT Byggaren 1.5.0-migreringen är klart."
