@@ -48,7 +48,7 @@ def main():
     out=Path(args.output_dir); out = out if out.is_absolute() else ROOT/out
     shutil.rmtree(out,ignore_errors=True); out.mkdir(parents=True)
     stage=ROOT/'.build-distributions'; shutil.rmtree(stage,ignore_errors=True); stage.mkdir()
-    instruction=extract_instruction()
+    instruction=(ROOT/'assistant/instructions.md').read_text(encoding='utf-8')
 
     # Custom GPT distribution: clean installation package representing current Builder config.
     custom=stage/'custom-gpt'; (custom/'gpt-configuration').mkdir(parents=True); (custom/'knowledge-upload').mkdir()
