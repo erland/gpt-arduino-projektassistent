@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import argparse, hashlib, json, re, shutil, zipfile
+import argparse, hashlib, json, re, shutil, zipfile, yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 KNOWLEDGE = [
@@ -36,10 +36,20 @@ def zip_dir(src, dest):
             info.external_attr=0o100644 << 16
             z.writestr(info,p.read_bytes())
 
+def registry_targets():
+    r=yaml.safe_load((ROOT/'runtime-distribution-registry.yaml').read_text(encoding='utf-8'))
+    targets=list(r.get('active_targets',[]) or [])
+    supported={'chat','custom-gpt'}
+    unknown=set(targets)-supported
+    if unknown:
+        raise SystemExit(f'Registry contains unsupported active targets: {sorted(unknown)}')
+    return targets
+
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--version'); ap.add_argument('--output-dir', default='dist')
     args=ap.parse_args()
     version=args.version or (ROOT/'VERSION').read_text(encoding='utf-8').strip()
+    targets=registry_targets()
     if not SEMVER.match(version): raise SystemExit(f'Ogiltig version: {version}')
     for f in KNOWLEDGE:
         if not (ROOT/'knowledge'/f).is_file(): raise SystemExit(f'Saknad Knowledge-fil: {f}')
@@ -51,29 +61,34 @@ def main():
     instruction=(ROOT/'assistant/instructions.md').read_text(encoding='utf-8')
 
     # Custom GPT distribution: clean installation package representing current Builder config.
-    custom=stage/'custom-gpt'; (custom/'gpt-configuration').mkdir(parents=True); (custom/'knowledge-upload').mkdir()
-    (custom/'VERSION').write_text(version+'\n',encoding='utf-8')
-    (custom/'gpt-configuration/instructions.txt').write_text(instruction,encoding='utf-8')
-    (custom/'gpt-configuration/README.md').write_text(
-        '# GPT Builder-konfiguration\n\nKlistra in `instructions.txt` i GPT Builder Instructions. Projektet har ännu inga fastställda conversation starters. Ladda upp samtliga filer i `knowledge-upload/` som Knowledge.\n', encoding='utf-8')
-    for f in KNOWLEDGE: shutil.copy2(ROOT/'knowledge'/f, custom/'knowledge-upload'/f)
-    shutil.copy2(ROOT/'gpt-builder/02-uppladdningslista-knowledge.md', custom/'knowledge-upload-list.md')
+    custom=stage/'custom-gpt'
+    if 'custom-gpt' in targets:
+        (custom/'gpt-configuration').mkdir(parents=True); (custom/'knowledge-upload').mkdir()
+        (custom/'VERSION').write_text(version+'\n',encoding='utf-8')
+        (custom/'gpt-configuration/instructions.txt').write_text(instruction,encoding='utf-8')
+        (custom/'gpt-configuration/README.md').write_text(
+            '# GPT Builder-konfiguration\n\nKlistra in `instructions.txt` i GPT Builder Instructions. Projektet har ännu inga fastställda conversation starters. Ladda upp samtliga filer i `knowledge-upload/` som Knowledge.\n', encoding='utf-8')
+        for f in KNOWLEDGE: shutil.copy2(ROOT/'knowledge'/f, custom/'knowledge-upload'/f)
+        shutil.copy2(ROOT/'gpt-builder/02-uppladdningslista-knowledge.md', custom/'knowledge-upload-list.md')
 
     # Portable Chat distribution.
-    chat=stage/'chat'; (chat/'assistant').mkdir(parents=True); (chat/'knowledge').mkdir()
-    shutil.copy2(ROOT/'portable/START-HERE.md', chat/'START-HERE.md')
-    (chat/'VERSION').write_text(version+'\n',encoding='utf-8')
-    (chat/'assistant/instructions.txt').write_text(instruction,encoding='utf-8')
-    for f in KNOWLEDGE: shutil.copy2(ROOT/'knowledge'/f, chat/'knowledge'/f)
-    files=[]
-    for p in sorted(x for x in chat.rglob('*') if x.is_file() and x.name!='MANIFEST.json'):
-        files.append({'path':p.relative_to(chat).as_posix(),'sha256':sha256(p)})
-    manifest={'package':'arduino-projektassistenten','format':'portable-chat-assistant','version':version,
-              'entrypoint':'START-HERE.md','instructions':'assistant/instructions.txt','knowledge':[f'knowledge/{f}' for f in KNOWLEDGE], 'files':files}
-    (chat/'MANIFEST.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    chat=stage/'chat'
+    if 'chat' in targets:
+        (chat/'assistant').mkdir(parents=True); (chat/'knowledge').mkdir()
+        shutil.copy2(ROOT/'portable/START-HERE.md', chat/'START-HERE.md')
+        (chat/'VERSION').write_text(version+'\n',encoding='utf-8')
+        (chat/'assistant/instructions.txt').write_text(instruction,encoding='utf-8')
+        for f in KNOWLEDGE: shutil.copy2(ROOT/'knowledge'/f, chat/'knowledge'/f)
+    if 'chat' in targets:
+        files=[]
+        for p in sorted(x for x in chat.rglob('*') if x.is_file() and x.name!='MANIFEST.json'):
+            files.append({'path':p.relative_to(chat).as_posix(),'sha256':sha256(p)})
+        manifest={'package':'arduino-projektassistenten','format':'portable-chat-assistant','version':version,
+                  'entrypoint':'START-HERE.md','instructions':'assistant/instructions.txt','knowledge':[f'knowledge/{f}' for f in KNOWLEDGE], 'files':files}
+        (chat/'MANIFEST.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
-    zip_dir(custom,out/f'arduino-projektassistent-custom-gpt-v{version}.zip')
-    zip_dir(chat,out/f'arduino-projektassistent-chat-v{version}.zip')
+    if 'custom-gpt' in targets: zip_dir(custom,out/f'arduino-projektassistent-custom-gpt-v{version}.zip')
+    if 'chat' in targets: zip_dir(chat,out/f'arduino-projektassistent-chat-v{version}.zip')
     shutil.rmtree(stage)
     print(f'Byggde distributioner för {version} i {out}')
 if __name__=='__main__': main()
